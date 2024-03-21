@@ -483,8 +483,10 @@ CParseResult CConfig::parseLine(std::string line, bool dynamic) {
     while (commentPos != std::string::npos) {
         bool escaped = false;
         if (commentPos < line.length() - 1) {
-            if (line[commentPos + 1] == '#') {
-                lastHashPos = commentPos + 2;
+            // use \# to get #, other case ignored as comment
+            // treat specially if '#' at line start
+            if ((commentPos != 0) && (line[commentPos - 1] == '\\')) {
+                lastHashPos = commentPos + 1;
                 escaped     = true;
             }
         }
@@ -493,7 +495,7 @@ CParseResult CConfig::parseLine(std::string line, bool dynamic) {
             line = line.substr(0, commentPos);
             break;
         } else {
-            line       = line.substr(0, commentPos + 1) + line.substr(commentPos + 2);
+            line       = line.substr(0, commentPos - 1) + '#' + line.substr(commentPos + 1);
             commentPos = line.find('#', lastHashPos);
         }
     }
